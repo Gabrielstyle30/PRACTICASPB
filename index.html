@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipo 2 — Calidad del Aire CDMX (RAMA 2015–2023) | GAD-2401</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ENCABEZADO INSTITUCIONAL -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div>
+        <div class="inst-badge">Tecnológico Nacional de México · TESCHA · Ingeniería Informática (GAD-2401)</div>
+        <h1>Calidad del Aire en la Ciudad de México (RAMA 2015–2023)</h1>
+      </div>
+      <div class="topbar-meta">
+        <div><strong>Equipo 2:</strong> José Gabriel Juárez Maya · Luis Andrés Nava</div>
+        <div>Análisis y Visualización de Datos · Versión Web Interactiva</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVEGACIÓN DE 4 PÁGINAS (RÚBRICA C4) -->
+  <nav class="nav-bar" aria-label="Navegación del tablero">
+    <div class="nav-inner">
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-page="page-1" role="tab">1. Portada y Pregunta</button>
+        <button class="tab-btn" data-page="page-2" role="tab">2. Exploración y Atípicos</button>
+        <button class="tab-btn" data-page="page-3" role="tab">3. Indicador Spearman</button>
+        <button class="tab-btn" data-page="page-4" role="tab">4. Limitaciones y Ficha Técnica</button>
+      </div>
+      <a class="csv-link" href="data/rama_cdmx_2015_2023.csv" download>⬇ Descargar CSV RAMA</a>
+    </div>
+  </nav>
+
+  <main>
+    <!-- ===================== PÁGINA 1: PORTADA Y PREGUNTA ===================== -->
+    <section id="page-1" class="page-section active">
+      <div class="grid-2-weighted mb-1">
+        <div class="card hero-question">
+          <span class="hero-tag">Pregunta de Investigación · Equipo 2</span>
+          <h2>¿La relación entre ozono (O₃) y material particulado fino (PM₂.₅) es monótona, y cómo cambia por estación del año?</h2>
+          <p>
+            Este tablero interactivo evalúa la asociación monótona diaria entre concentraciones de <strong>O₃ (ppb)</strong> y
+            <strong>PM₂.₅ (µg/m³)</strong> en la Ciudad de México a partir de registros abiertos de la Red Automática de Monitoreo
+            Atmosférico (RAMA). Implementa los tres ejes del temario asignados al Equipo 2:
+            <strong>Coeficiente de Spearman (2.1.2)</strong>, <strong>detección de atípicos IQR (1.3.2)</strong> y
+            <strong>análisis de datos periódicos (3.3)</strong>, contrastando su robustez frente a Pearson (2.1.1).
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Integrantes y Datos del Proyecto</div>
+          <ul class="team-list">
+            <li>José Gabriel Juárez Maya</li>
+            <li>Luis Andrés Nava</li>
+          </ul>
+          <div class="meta-kv">
+            <div><strong>Institución:</strong> Tecnológico de Estudios Superiores de Chalco (TESCHA)</div>
+            <div><strong>Asignatura:</strong> Análisis y Visualización de Datos (GAD-2401)</div>
+            <div><strong>Fuente:</strong> RAMA — Datos Abiertos CDMX</div>
+            <div><strong>Corte temporal:</strong> 1 de enero de 2015 al 31 de mayo de 2023</div>
+            <div><strong>Calidad ETL:</strong> 3,073 días válidos · 0 nulos · 0 duplicados</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs GLOBALES -->
+      <div class="grid-4 mb-1">
+        <div class="kpi-card">
+          <div class="kpi-label">Días analizados (n)</div>
+          <div class="kpi-value" id="p1-n">—</div>
+          <div class="kpi-sub">Serie continua 2015–2023</div>
+        </div>
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">Spearman global (ρ)</div>
+          <div class="kpi-value" id="p1-rho">—</div>
+          <div class="kpi-sub">Asociación monótona positiva moderada</div>
+        </div>
+        <div class="kpi-card accent-slate">
+          <div class="kpi-label">Pearson global (r)</div>
+          <div class="kpi-value" id="p1-r">—</div>
+          <div class="kpi-sub">Más sensible a días extremos</div>
+        </div>
+        <div class="kpi-card accent-coral">
+          <div class="kpi-label">Días atípicos PM₂.₅</div>
+          <div class="kpi-value" id="p1-atip">—</div>
+          <div class="kpi-sub">Superiores a 42.52 µg/m³ (1.5 × IQR)</div>
+        </div>
+      </div>
+
+      <!-- ACCESOS RÁPIDOS -->
+      <div class="quick-nav">
+        <button class="quick-card" data-goto="page-2">
+          <h3>2. Exploración y Atípicos →</h3>
+          <p>Recorre el ciclo periódico mensual (3.3), la estacionalidad de lluvias y los 51 atípicos de PM₂.₅ detectados por IQR (1.3.2).</p>
+        </button>
+        <button class="quick-card" data-goto="page-3">
+          <h3>3. Indicador Spearman en Vivo →</h3>
+          <p>Filtra por año, estación y atípicos para recalcular Spearman (ρ) y Pearson (r) en tiempo real sobre el diagrama de dispersión.</p>
+        </button>
+        <button class="quick-card" data-goto="page-4">
+          <h3>4. Limitaciones y Ficha Técnica →</h3>
+          <p>Consulta el patrón cuantificado, la advertencia no causal, confusores meteorológicos, diccionario de campos y privacidad.</p>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================== PÁGINA 2: EXPLORACIÓN Y ATÍPICOS ===================== -->
+    <section id="page-2" class="page-section">
+      <div class="slicers-bar">
+        <div class="slicer-group">
+          <label for="p2-anio">Año</label>
+          <select id="p2-anio" class="slicer-anio">
+            <option value="ALL">Todos los años (2015–2023)</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <label for="p2-estacion">Estación del Año</label>
+          <select id="p2-estacion" class="slicer-estacion">
+            <option value="ALL">Todas las estaciones</option>
+            <option value="Primavera">Primavera (Mar–May)</option>
+            <option value="Verano">Verano (Jun–Ago)</option>
+            <option value="Otoño">Otoño (Sep–Nov)</option>
+            <option value="Invierno">Invierno (Dic–Feb)</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <label for="p2-atipico">Días Atípicos (1.5 × IQR)</label>
+          <select id="p2-atipico" class="slicer-atipico">
+            <option value="ALL">Incluir todos los días</option>
+            <option value="NO">Excluir atípicos IQR</option>
+            <option value="SI">Mostrar solo atípicos IQR</option>
+          </select>
+        </div>
+        <button class="btn-reset" type="button">Restablecer filtros</button>
+      </div>
+
+      <div class="grid-5 mb-1">
+        <div class="kpi-card">
+          <div class="kpi-label">Registros filtrados (n)</div>
+          <div class="kpi-value" id="p2-n">—</div>
+        </div>
+        <div class="kpi-card accent-slate">
+          <div class="kpi-label">O₃ Promedio</div>
+          <div class="kpi-value" id="p2-o3">—</div>
+        </div>
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">PM₂.₅ Promedio</div>
+          <div class="kpi-value" id="p2-pm">—</div>
+        </div>
+        <div class="kpi-card accent-coral">
+          <div class="kpi-label">Atípicos PM₂.₅</div>
+          <div class="kpi-value" id="p2-atip-pm">—</div>
+        </div>
+        <div class="kpi-card accent-amber">
+          <div class="kpi-label">Atípicos O₃</div>
+          <div class="kpi-value" id="p2-atip-o3">—</div>
+        </div>
+      </div>
+
+      <div class="grid-2-weighted mb-1">
+        <div class="card">
+          <div class="card-title">Primavera concentra los picos de O₃ y PM₂.₅; verano registra el mínimo por lluvias</div>
+          <div class="card-subtitle">Serie periódica mensual (tema 3.3): promedio diario agrupado por mes calendario</div>
+          <div class="chart-wrap">
+            <canvas id="chartMonthly"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Invierno acumula 40 de los 51 días atípicos de PM₂.₅ (78.4%)</div>
+          <div class="card-subtitle">Detección de atípicos por regla 1.5 × IQR (tema 1.3.2) por estación del año</div>
+          <div class="chart-wrap">
+            <canvas id="chartOutliers"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">Evolución anual: Spearman supera a Pearson en años con picos extremos</div>
+          <div class="card-subtitle">Comparativa anual de ρ vs. r (*2023 incluye del 1 de enero al 31 de mayo)</div>
+          <div class="chart-wrap">
+            <canvas id="chartAnnual"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Umbrales estadísticos de detección de atípicos (Regla 1.5 × IQR)</div>
+          <div class="card-subtitle">Criterio aplicado explícitamente en la limpieza ETL sin eliminar ni imputar observaciones reales</div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Contaminante</th>
+                  <th class="num">Q1</th>
+                  <th class="num">Q3</th>
+                  <th class="num">IQR</th>
+                  <th class="num">Lím. Inf.</th>
+                  <th class="num">Lím. Sup.</th>
+                  <th class="num">Atípicos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Ozono O₃ (ppb)</strong></td>
+                  <td class="num">23.92</td>
+                  <td class="num">36.22</td>
+                  <td class="num">12.29</td>
+                  <td class="num">5.48</td>
+                  <td class="num">54.66</td>
+                  <td class="num"><strong>23</strong> (0.75%)</td>
+                </tr>
+                <tr>
+                  <td><strong>PM₂.₅ (µg/m³)</strong></td>
+                  <td class="num">15.34</td>
+                  <td class="num">26.21</td>
+                  <td class="num">10.87</td>
+                  <td class="num">-0.96</td>
+                  <td class="num">42.52</td>
+                  <td class="num"><strong>51</strong> (1.66%)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="margin-top: 0.9rem; font-size: 0.88rem; color: var(--muted);">
+            <strong>Máximos históricos registrados:</strong> O₃ alcanzó <strong>67.44 ppb</strong> el 21 de mayo de 2022 (Primavera) y
+            PM₂.₅ alcanzó <strong>86.91 µg/m³</strong> el 1 de enero de 2016 (Invierno, asociado a pirotecnia e inversión térmica).
+            Conservar los atípicos etiquetados permite activar/desactivar el filtro y comprobar por qué Spearman es más estable que Pearson.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PÁGINA 3: INDICADOR SPEARMAN ===================== -->
+    <section id="page-3" class="page-section">
+      <div class="slicers-bar">
+        <div class="slicer-group">
+          <label for="p3-anio">Año</label>
+          <select id="p3-anio" class="slicer-anio">
+            <option value="ALL">Todos los años (2015–2023)</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <label for="p3-estacion">Estación del Año</label>
+          <select id="p3-estacion" class="slicer-estacion">
+            <option value="ALL">Todas las estaciones</option>
+            <option value="Primavera">Primavera (Mar–May)</option>
+            <option value="Verano">Verano (Jun–Ago)</option>
+            <option value="Otoño">Otoño (Sep–Nov)</option>
+            <option value="Invierno">Invierno (Dic–Feb)</option>
+          </select>
+        </div>
+        <div class="slicer-group">
+          <label for="p3-atipico">Días Atípicos (1.5 × IQR)</label>
+          <select id="p3-atipico" class="slicer-atipico">
+            <option value="ALL">Incluir todos los días</option>
+            <option value="NO">Excluir atípicos IQR</option>
+            <option value="SI">Mostrar solo atípicos IQR</option>
+          </select>
+        </div>
+        <button class="btn-reset" type="button">Restablecer filtros</button>
+      </div>
+
+      <div class="grid-4 mb-1">
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">Coeficiente de Spearman (ρ)</div>
+          <div class="kpi-value" id="p3-rho">—</div>
+          <div class="kpi-sub">Indicador principal del temario (2.1.2)</div>
+        </div>
+        <div class="kpi-card accent-slate">
+          <div class="kpi-label">Coeficiente de Pearson (r)</div>
+          <div class="kpi-value" id="p3-r">—</div>
+          <div class="kpi-sub">Referencia lineal paramétrica (2.1.1)</div>
+        </div>
+        <div class="kpi-card accent-amber">
+          <div class="kpi-label">Diferencia (ρ − r)</div>
+          <div class="kpi-value" id="p3-diff">—</div>
+          <div class="kpi-sub">Brecha generada por asimetría/atípicos</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Tamaño de muestra (n)</div>
+          <div class="kpi-value" id="p3-n">—</div>
+          <div class="kpi-sub">Pares diarios (O₃, PM₂.₅) válidos</div>
+        </div>
+      </div>
+
+      <div class="interp-banner">
+        <div>
+          <span style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: var(--slate-blue); display: block;">Lectura dinámica del indicador</span>
+          <strong id="p3-interp-text">Calculando...</strong>
+        </div>
+        <span class="interp-pill" id="p3-filter-pill">2015–2023</span>
+      </div>
+
+      <div class="grid-2 mb-1">
+        <div class="card">
+          <div class="card-title">Dispersión diaria O₃ vs. PM₂.₅: los atípicos explican la caída de Pearson</div>
+          <div class="card-subtitle">Pasa el cursor sobre cualquier punto para ver fecha, estación y concentraciones exactas</div>
+          <div class="chart-wrap-tall">
+            <canvas id="chartScatter"></canvas>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Comparativa Spearman (ρ) vs. Pearson (r) por Estación del Año</div>
+          <div class="card-subtitle">Recalculada dinámicamente con tus filtros activos</div>
+          <div class="table-responsive mb-1">
+            <table>
+              <thead>
+                <tr>
+                  <th>Estación</th>
+                  <th class="num">n</th>
+                  <th class="num">Spearman (ρ)</th>
+                  <th class="num">Pearson (r)</th>
+                  <th class="num">ρ − r</th>
+                  <th class="num">O₃</th>
+                  <th class="num">PM₂.₅</th>
+                  <th class="num">Atíp.</th>
+                </tr>
+              </thead>
+              <tbody id="season-table-body"></tbody>
+            </table>
+          </div>
+
+          <div class="formula-box">
+            ρ = Cov(R(O₃), R(PM₂.₅)) / ( σ<sub>R(O₃)</sub> · σ<sub>R(PM₂.₅)</sub> )
+            &nbsp;&nbsp;≈&nbsp;&nbsp;
+            1 − [ 6 · Σ d<sub>i</sub>² / ( n · (n² − 1) ) ]
+          </div>
+          <p style="font-size: 0.85rem; color: var(--muted);">
+            <strong>Supuestos y lectura:</strong> Spearman no exige normalidad ni linealidad estricta; evalúa si la relación entre
+            rangos <em>R(O₃)</em> y <em>R(PM₂.₅)</em> es <strong>monótona</strong>. Prueba activar <em>"Excluir atípicos IQR"</em> arriba:
+            verás que Spearman casi no se altera (0.4630 → 0.4678), mientras Pearson salta de 0.4365 a 0.4688 (y en Invierno pasa de 0.3702 a 0.44+).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== PÁGINA 4: LIMITACIONES Y FICHA TÉCNICA ===================== -->
+    <section id="page-4" class="page-section">
+      <div class="grid-2 mb-1">
+        <div class="card">
+          <div class="card-title">1. Patrón concreto cuantificado (C5)</div>
+          <ul class="bullet-list">
+            <li><strong>Asociación global:</strong> Entre 2015 y 2023 existe una relación monótona positiva moderada entre O₃ y PM₂.₅ (<strong>ρ = +0.4630</strong>, n = 3,073 días, p &lt; 0.001).</li>
+            <li><strong>Variación estacional:</strong> La asociación alcanza su punto máximo en <strong>Primavera (ρ = +0.4822, n = 828)</strong>, periodo seco con alta radiación solar, y disminuye en <strong>Verano (ρ = +0.4149, n = 736)</strong> por el lavado atmosférico de lluvias.</li>
+            <li><strong>Efecto de los atípicos en Invierno:</strong> Invierno concentra <strong>40 de los 51 días atípicos de PM₂.₅ (78.4%)</strong>. Esos picos extremos hacen caer a Pearson (r = +0.3702), mientras Spearman conserva la tendencia monótona (ρ = +0.4475).</li>
+          </ul>
+        </div>
+
+        <div class="card card-danger">
+          <div class="card-title">2. Qué NO se puede concluir — Límite causal (C5)</div>
+          <ul class="bullet-list">
+            <li><strong>No existe evidencia de causalidad:</strong> No se puede afirmar que el aumento de ozono produzca más PM₂.₅, ni que el PM₂.₅ genere ozono.</li>
+            <li><strong>Solo covariación de rangos:</strong> Spearman mide únicamente si dos variables tienden a subir juntas de forma monótona, sin probar dirección ni mecanismo físico-químico causal.</li>
+            <li><strong>No reemplaza alertas horarias:</strong> Al trabajar con promedios diarios globales de la CDMX, se suavizan los picos vespertinos horarios con los que la CAMe decreta contingencias ambientales.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-1">
+        <div class="card">
+          <div class="card-title">3. Confusores y límites del conjunto de datos</div>
+          <ul class="bullet-list">
+            <li><strong>Confusores meteorológicos ausentes en el CSV:</strong> Inversión térmica invernal, radiación solar UV, velocidad del viento, temperatura ambiente y precipitación pluvial explican el ascenso o descenso simultáneo de ambos contaminantes.</li>
+            <li><strong>Confusores humanos y estacionales:</strong> Tráfico vehicular, incendios forestales de temporada seca (primavera) y quema de pirotecnia en festividades decembrinas y de Año Nuevo.</li>
+            <li><strong>Agregación y truncamiento:</strong> El archivo agrega toda la CDMX en una sola media diaria (sin desglose por estación física RAMA como Pedregal, Merced o Tlalnepantla) y el año 2023 solo cubre hasta el 31 de mayo (151 días).</li>
+          </ul>
+        </div>
+
+        <div class="card card-success">
+          <div class="card-title">4. Privacidad, ética del dato y reparto de roles (C8 y C10)</div>
+          <ul class="bullet-list">
+            <li><strong>Privacidad:</strong> Los datos de la RAMA son mediciones físico-químicas ambientales agregadas; no contienen nombres, domicilios, placas ni datos personales o sensibles (riesgo nulo de reidentificación).</li>
+            <li><strong>Ética del uso:</strong> No deben emplearse estos promedios de ciudad completa para emitir diagnósticos médicos individuales ni responsabilizar a una alcaldía específica.</li>
+            <li><strong>Roles del Equipo 2:</strong>
+              <br>• <em>José Gabriel Juárez Maya:</em> Extracción y validación ETL, modelo de datos, cálculo estadístico (Spearman/Pearson en DAX y JS), arquitectura web y defensa técnica.
+              <br>• <em>Luis Andrés Nava:</em> Análisis exploratorio estacional y de atípicos IQR, diseño visual e interactividad del tablero, documentación técnica (ficha y limitaciones) y defensa de hallazgos.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">5. Ficha técnica de la fuente y diccionario de campos (C6 y C7)</div>
+        <div class="card-subtitle">
+          <strong>Organismo:</strong> Secretaría del Medio Ambiente CDMX (SEDEMA — RAMA) ·
+          <strong>Fuente:</strong> <a href="https://datos.cdmx.gob.mx/dataset/red-automatica-de-monitoreo-atmosferico" target="_blank" rel="noopener">Portal de Datos Abiertos CDMX</a> ·
+          <strong>Licencia:</strong> Libre Uso MX (Datos Abiertos) ·
+          <strong>Unidad de análisis:</strong> 1 fila = 1 día calendario promedio en CDMX ·
+          <strong>Bitácora ETL:</strong> Conversión de tipos, revisión de 0 duplicados en <code>fecha</code>, verificación de 0 nulos en O₃/PM₂.₅, creación de tabla calendario y banderas IQR sin imputación.
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Tipo</th>
+                <th>Unidad / Dominio</th>
+                <th>Descripción en el modelo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><code>Fecha</code></td><td>Fecha</td><td>YYYY-MM-DD</td><td>Llave primaria diaria (2015-01-01 a 2023-05-31); enlaza hechos con calendario.</td></tr>
+              <tr><td><code>O3_ppb</code></td><td>Numérico</td><td>ppb</td><td>Concentración promedio diaria de ozono troposférico (variable X).</td></tr>
+              <tr><td><code>PM25_ug_m3</code></td><td>Numérico</td><td>µg/m³</td><td>Concentración promedio diaria de partículas finas ≤ 2.5 micrómetros (variable Y).</td></tr>
+              <tr><td><code>Estacion</code></td><td>Texto</td><td>Primavera / Verano / Otoño / Invierno</td><td>Estación meteorológica del hemisferio norte derivada del mes calendario.</td></tr>
+              <tr><td><code>Atipico_O3 / PM25</code></td><td>Texto</td><td>Sí / No</td><td>Bandera calculada por regla 1.5 × IQR para evaluar sensibilidad de Pearson vs. Spearman.</td></tr>
+              <tr><td><code>PM10, NO2, CO, SO2</code></td><td>Numérico</td><td>µg/m³, ppb, ppm</td><td>Contaminantes complementarios conservados como contexto ambiental.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Proyecto Final GAD-2401 · Análisis y Visualización de Datos · TecNM / TESCHA · Equipo 2: José Gabriel Juárez Maya y Luis Andrés Nava ·
+    Datos públicos de <a href="https://datos.cdmx.gob.mx/dataset/red-automatica-de-monitoreo-atmosferico" target="_blank" rel="noopener">RAMA CDMX</a>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
